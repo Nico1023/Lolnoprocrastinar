@@ -55,7 +55,7 @@ private val FULL_COLUMNS =
 class AnkiDroidStudyRepository
     @Inject
     constructor(
-        @ApplicationContext private val context: Context,
+        @param:ApplicationContext private val context: Context,
         private val dayCounters: DayCountersStore,
     ) : VocabularyStudyRepository {
         private val shownCards = ConcurrentHashMap<Long, ShownCard>()
