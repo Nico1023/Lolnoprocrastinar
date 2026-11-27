@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.procrastilearn.app.R
@@ -78,6 +79,34 @@ class OverlayScreenTest {
     }
 
     @Test
+    fun `reveal button stays disabled until an answer is typed`() {
+        val revealTranslationText = context.getString(R.string.learning_show_translation)
+        var toggled = false
+
+        composeTestRule.setContent {
+            OverlayScreen(
+                uiState =
+                    OverlayUiState(
+                        vocabularyItem = sampleVocabularyItem,
+                        showAnswer = false,
+                    ),
+                onToggleShowAnswer = { toggled = true },
+                onDifficultySelect = {},
+            )
+        }
+
+        composeTestRule.onNodeWithText(revealTranslationText).assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("typed_answer_field").performTextInput("abc")
+        composeTestRule.onNodeWithText(revealTranslationText).assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("typed_answer_field").performTextInput("de")
+        composeTestRule.onNodeWithText(revealTranslationText).assertIsEnabled()
+
+        composeTestRule.runOnIdle {
+            assertThat(toggled).isFalse()
+        }
+    }
+
+    @Test
     fun `clicking reveal button invokes callback`() {
         val revealTranslationText = context.getString(R.string.learning_show_translation)
         var toggled = false
@@ -94,6 +123,7 @@ class OverlayScreenTest {
             )
         }
 
+        composeTestRule.onNodeWithTag("typed_answer_field").performTextInput("my answer")
         composeTestRule.onNodeWithText(revealTranslationText).performClick()
 
         composeTestRule.runOnIdle {

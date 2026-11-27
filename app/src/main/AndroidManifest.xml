@@ -7,7 +7,12 @@
     <!-- To detect when the device is offline so
          AI-translated word additions can be queued and retried once connectivity returns. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- To read scheduled flashcards from AnkiDroid and record the user's answers there,
+         so reviews done in the gate share one history with Anki desktop and AnkiDroid. -->
+    <uses-permission android:name="com.ichi2.anki.permission.READ_WRITE_DATABASE" />
     <queries>
+        <package android:name="com.ichi2.anki" />
+        <provider android:authorities="com.ichi2.anki.flashcards" />
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />

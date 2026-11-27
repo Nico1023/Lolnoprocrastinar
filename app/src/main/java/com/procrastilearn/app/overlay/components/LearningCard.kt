@@ -32,13 +32,19 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +56,8 @@ import com.procrastilearn.app.overlay.OverlayUiState
 import com.procrastilearn.app.overlay.theme.OverlayThemeTokens
 import com.procrastilearn.app.utils.isLandscapeOrientation
 import io.github.openspacedrepetition.Rating
+
+const val MIN_TYPED_ANSWER_CHARS = 5
 
 @Suppress("LongMethod")
 @Composable
@@ -78,7 +86,38 @@ fun LearningCard(
                     .paddingFromBaseline(top = 45.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            var typedAnswer by rememberSaveable(state.vocabularyItem?.id) { mutableStateOf("") }
+            val keyboard = LocalSoftwareKeyboardController.current
             LearningCardTitle(state)
+            if (!state.showAnswer) {
+                OutlinedTextField(
+                    value = typedAnswer,
+                    onValueChange = { typedAnswer = it },
+                    placeholder = { Text(stringResource(R.string.learning_typed_answer_hint)) },
+                    minLines = 3,
+                    maxLines = 6,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                            .testTag("typed_answer_field"),
+                )
+            } else if (typedAnswer.isNotBlank()) {
+                Text(
+                    text = stringResource(R.string.learning_your_answer, typedAnswer.trim()),
+                    color = OverlayThemeTokens.colors.helpText,
+                    fontSize = 15.sp,
+                    maxLines = 4,
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                )
+            }
+            val canReveal = typedAnswer.trim().length >= MIN_TYPED_ANSWER_CHARS
+            val revealAfterTyping = {
+                if (canReveal) {
+                    keyboard?.hide()
+                    onToggleShowAnswer()
+                }
+            }
             // Translation area (middle). Scrollable when shown.
             val scrollState = rememberScrollState()
             LaunchedEffect(state.vocabularyItem?.id, state.showAnswer) {
@@ -129,7 +168,8 @@ fun LearningCard(
 
             LearningCardFooter(
                 state = state,
-                onToggleShowAnswer = onToggleShowAnswer,
+                onToggleShowAnswer = revealAfterTyping,
+                canReveal = canReveal,
                 onDifficultySelect = onDifficultySelect,
                 onRetryNextCard = onRetryNextCard,
                 ratingLockSecondsRemaining = ratingLockSecondsRemaining,
@@ -140,18 +180,34 @@ fun LearningCard(
     }
 }
 
+private const val LONG_PROMPT_CHARS = 70
+
 @Composable
 private fun LearningCardTitle(state: OverlayUiState) {
     Box(
         modifier =
             Modifier
                 .padding(top = 6.dp, bottom = 10.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .heightIn(max = 220.dp)
+                .verticalScroll(rememberScrollState()),
     ) {
+        val word = state.vocabularyItem?.word ?: stringResource(R.string.learning_no_word)
+        val isLongPrompt = word.length > LONG_PROMPT_CHARS
         Text(
-            text = state.vocabularyItem?.word ?: stringResource(R.string.learning_no_word),
-            fontSize = if (state.showAnswer) 22.sp else 30.sp,
-            lineHeight = if (state.showAnswer) 30.sp else 40.sp,
+            text = word,
+            fontSize =
+                when {
+                    isLongPrompt -> 18.sp
+                    state.showAnswer -> 22.sp
+                    else -> 30.sp
+                },
+            lineHeight =
+                when {
+                    isLongPrompt -> 25.sp
+                    state.showAnswer -> 30.sp
+                    else -> 40.sp
+                },
             fontWeight = FontWeight.SemiBold,
             color = OverlayThemeTokens.colors.titleColor,
             textAlign = TextAlign.Center,
@@ -176,6 +232,7 @@ private fun LearningCardTitle(state: OverlayUiState) {
 private fun LearningCardFooter(
     state: OverlayUiState,
     onToggleShowAnswer: () -> Unit,
+    canReveal: Boolean,
     onDifficultySelect: (Rating) -> Unit,
     onRetryNextCard: () -> Unit,
     ratingLockSecondsRemaining: Int,
@@ -193,6 +250,7 @@ private fun LearningCardFooter(
         LearningCardRevealFooter(
             state = state,
             onToggleShowAnswer = onToggleShowAnswer,
+            canReveal = canReveal,
             onRetryNextCard = onRetryNextCard,
             showTranslationButtonHeight = showTranslationButtonHeight,
             addNavigationBarsPadding = addNavigationBarsPadding,
@@ -204,6 +262,7 @@ private fun LearningCardFooter(
 private fun LearningCardRevealFooter(
     state: OverlayUiState,
     onToggleShowAnswer: () -> Unit,
+    canReveal: Boolean,
     onRetryNextCard: () -> Unit,
     showTranslationButtonHeight: androidx.compose.ui.unit.Dp,
     addNavigationBarsPadding: Boolean,
@@ -231,6 +290,7 @@ private fun LearningCardRevealFooter(
                 }
             OutlinedButton(
                 onClick = onToggleShowAnswer,
+                enabled = canReveal,
                 modifier = buttonModifier,
                 shape = RoundedCornerShape(14.dp),
                 colors =

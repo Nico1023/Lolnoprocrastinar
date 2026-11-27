@@ -2,6 +2,7 @@ package com.procrastilearn.app.di
 
 import com.procrastilearn.app.data.AppRepository
 import com.procrastilearn.app.data.AppRepositoryImpl
+import com.procrastilearn.app.data.ankidroid.AnkiDroidStudyRepository
 import com.procrastilearn.app.data.parser.anki.AnkiApkgVocabularyParser
 import com.procrastilearn.app.data.parser.json.JsonVocabularyParser
 import com.procrastilearn.app.data.repository.AppPreferencesRepositoryImpl
@@ -39,7 +40,7 @@ abstract class AppModule {
 
     @Binds
     @Singleton
-    abstract fun bindVocabularyStudyRepository(impl: VocabularyRepositoryImpl): VocabularyStudyRepository
+    abstract fun bindVocabularyStudyRepository(impl: AnkiDroidStudyRepository): VocabularyStudyRepository
 
     @Binds
     @Singleton

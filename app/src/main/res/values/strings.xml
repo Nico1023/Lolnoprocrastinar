@@ -382,4 +382,6 @@
     <string name="overlay_next_card_load_error">Could not load the next card.</string>
     <string name="overlay_next_card_retry">Retry</string>
     <string name="overlay_next_card_loading">Loading next card…</string>
+    <string name="learning_typed_answer_hint" tools:ignore="MissingTranslation">Type your answer first (at least 5 characters)</string>
+    <string name="learning_your_answer" tools:ignore="MissingTranslation">Your answer: %1$s</string>
 </resources>

@@ -43,7 +43,7 @@ android {
   compileSdk = 37
 
   defaultConfig {
-    applicationId = "com.procrastilearn.app"
+    applicationId = "com.nico1023.lolnoprocrastinar"
     minSdk = 30
     //noinspection OldTargetApi
     targetSdk = 36
@@ -68,6 +68,12 @@ android {
   }
 
   signingConfigs {
+    getByName("debug") {
+      storeFile = rootProject.file("keystore/lolno-debug.keystore")
+      storePassword = "android"
+      keyAlias = "androiddebugkey"
+      keyPassword = "android"
+    }
     if (hasReleaseSigningCredentials) {
       create("release") {
         storeFile = file(releaseSigningEnvironment.getValue("PROCRASTILEARN_UPLOAD_STORE_FILE"))

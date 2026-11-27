@@ -1,0 +1,52 @@
+name: Compilar APK
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-apk
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Compilar APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Preparar archivo
+        run: cp app/build/outputs/apk/debug/*.apk lolnoprocrastinar.apk
+
+      - name: Subir como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: lolnoprocrastinar-apk
+          path: lolnoprocrastinar.apk
+
+      - name: Publicar en Releases (descarga directa desde el celular)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ultima
+          name: Última versión
+          body: "APK compilado desde ${{ github.sha }}. Descarga lolnoprocrastinar.apk."
+          prerelease: true
+          make_latest: false
+          files: lolnoprocrastinar.apk

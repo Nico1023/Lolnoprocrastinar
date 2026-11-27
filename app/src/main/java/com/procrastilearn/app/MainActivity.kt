@@ -7,6 +7,7 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,6 +27,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
+import com.procrastilearn.app.data.ankidroid.AnkiDroidContract
 import com.procrastilearn.app.data.local.prefs.LanguagePreferencesStore
 import com.procrastilearn.app.data.text.ProcessTextEventBus
 import com.procrastilearn.app.domain.model.LanguagePair
@@ -84,10 +86,14 @@ class MainActivity : ComponentActivity() {
     // several `remember`-scoped states across branches; splitting it would mean threading that
     // shared state across composable boundaries for marginal gain.
     @Suppress("LongMethod", "CyclomaticComplexMethod", "CognitiveComplexMethod")
+    private val ankiDroidPermissionRequest =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handleProcessTextIntent(intent)
+        requestAnkiDroidAccessIfNeeded()
 
         setContent {
             MyApplicationTheme {
@@ -229,6 +235,12 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handleProcessTextIntent(intent)
+    }
+
+    private fun requestAnkiDroidAccessIfNeeded() {
+        if (AnkiDroidContract.isInstalled(this) && !AnkiDroidContract.hasPermission(this)) {
+            ankiDroidPermissionRequest.launch(AnkiDroidContract.READ_WRITE_PERMISSION)
+        }
     }
 
     private fun handleProcessTextIntent(intent: Intent?) {

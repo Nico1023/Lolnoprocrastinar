@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import com.procrastilearn.app.R
 import com.procrastilearn.app.domain.model.VocabularyItem
@@ -95,6 +96,7 @@ class DojoScreenTest {
     fun `clicking reveal button invokes onToggleShowAnswer`() {
         setContent(DojoUiState(vocabularyItem = sampleWord, showAnswer = false, isLoading = false))
 
+        composeTestRule.onNodeWithTag("typed_answer_field").performTextInput("my answer")
         composeTestRule.onNodeWithText(string(R.string.learning_show_translation)).performClick()
 
         verify(exactly = 1) { onToggleShowAnswer.invoke() }

@@ -36,7 +36,7 @@
     <!-- ─── Learning flow ───────────────────────────────────────────────────── -->
     <string name="learning_no_word">No hay ninguna palabra cargada</string>
     <string name="learning_no_translation">No hay ninguna traducción cargada</string>
-    <string name="learning_show_translation">Mostrar traducción</string>
+    <string name="learning_show_translation">Mostrar respuesta</string>
     <string name="learning_question">¿Qué tan bien lo sabías?</string>
 
     <!-- Ratings -->
@@ -390,4 +390,6 @@
     </plurals>
     <string name="settings_pause_background_audio_headline">Solicitar pausa del audio en segundo plano</string>
     <string name="settings_pause_background_audio_summary">Solicita a otras apps que pausen el audio mientras se muestra una superposición de repaso. Las apps pueden seguir reproduciendo o detener el audio independientemente de este ajuste.</string>
+    <string name="learning_typed_answer_hint">Escribe tu respuesta primero (mínimo 5 caracteres)</string>
+    <string name="learning_your_answer">Tu respuesta: %1$s</string>
 </resources>
